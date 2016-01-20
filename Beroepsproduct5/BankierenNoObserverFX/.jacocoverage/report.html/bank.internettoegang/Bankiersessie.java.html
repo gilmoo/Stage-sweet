@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="nl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Bankiersessie.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;BankierenNoObserverFX&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">bank.internettoegang</a> &gt; <span class="el_source">Bankiersessie.java</span></div><h1>Bankiersessie.java</h1><pre class="source lang-java linenums">package bank.internettoegang;
+
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+
+import bank.bankieren.IBank;
+import bank.bankieren.IRekening;
+import bank.bankieren.Money;
+
+import fontys.util.InvalidSessionException;
+import fontys.util.NumberDoesntExistException;
+
+public class Bankiersessie extends UnicastRemoteObject implements
+		IBankiersessie {
+
+	private static final long serialVersionUID = 1L;
+	private long laatsteAanroep;
+	private int reknr;
+	private IBank bank;
+
+<span class="fc" id="L21">	public Bankiersessie(int reknr, IBank bank) throws RemoteException {</span>
+<span class="fc" id="L22">		laatsteAanroep = System.currentTimeMillis();</span>
+<span class="fc" id="L23">		this.reknr = reknr;</span>
+<span class="fc" id="L24">		this.bank = bank;</span>
+		
+<span class="fc" id="L26">	}</span>
+
+	public boolean isGeldig() {
+<span class="fc bfc" id="L29" title="All 2 branches covered.">		return System.currentTimeMillis() - laatsteAanroep &lt; GELDIGHEIDSDUUR;</span>
+	}
+
+	@Override
+	public boolean maakOver(int bestemming, Money bedrag)
+			throws NumberDoesntExistException, InvalidSessionException,
+			RemoteException {
+		
+<span class="fc" id="L37">		updateLaatsteAanroep();</span>
+		
+<span class="fc bfc" id="L39" title="All 2 branches covered.">		if (reknr == bestemming)</span>
+<span class="fc" id="L40">			throw new RuntimeException(</span>
+					&quot;source and destination must be different&quot;);
+<span class="fc bfc" id="L42" title="All 2 branches covered.">		if (!bedrag.isPositive())</span>
+<span class="fc" id="L43">			throw new RuntimeException(&quot;amount must be positive&quot;);</span>
+		
+<span class="fc" id="L45">		return bank.maakOver(reknr, bestemming, bedrag);</span>
+	}
+
+	private void updateLaatsteAanroep() throws InvalidSessionException {
+<span class="fc bfc" id="L49" title="All 2 branches covered.">		if (!isGeldig()) {</span>
+<span class="fc" id="L50">			throw new InvalidSessionException(&quot;session has been expired&quot;);</span>
+		}
+		
+<span class="fc" id="L53">		laatsteAanroep = System.currentTimeMillis();</span>
+<span class="fc" id="L54">	}</span>
+
+	@Override
+	public IRekening getRekening() throws InvalidSessionException,
+			RemoteException {
+
+<span class="nc" id="L60">		updateLaatsteAanroep();</span>
+		
+<span class="nc" id="L62">		return bank.getRekening(reknr);</span>
+	}
+
+	@Override
+	public void logUit() throws RemoteException {
+<span class="nc" id="L67">		UnicastRemoteObject.unexportObject(this, true);</span>
+<span class="nc" id="L68">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

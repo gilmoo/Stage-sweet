@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="nl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>BankierClient.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;BankierenNoObserverFX&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">bank.gui</a> &gt; <span class="el_source">BankierClient.java</span></div><h1>BankierClient.java</h1><pre class="source lang-java linenums">
+
+
+
+
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package bank.gui;
+
+import bank.gui.BankSelectController;
+import bank.gui.BankierSessieController;
+import bank.gui.LoginController;
+import bank.gui.OpenRekeningController;
+import bank.internettoegang.IBalie;
+import bank.internettoegang.IBankiersessie;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.rmi.Naming;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.fxml.JavaFXBuilderFactory;
+import javafx.scene.Scene;
+import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
+
+/**
+ *
+ * @author frankcoenen
+ */
+<span class="nc" id="L39">public class BankierClient extends Application {</span>
+    
+    private Stage stage;
+<span class="nc" id="L42">    private final double MINIMUM_WINDOW_WIDTH = 390.0;</span>
+<span class="nc" id="L43">    private final double MINIMUM_WINDOW_HEIGHT = 500.0;</span>
+   // 
+
+    @Override
+    public void start(Stage primaryStage) throws IOException {
+        
+         try {
+<span class="nc" id="L50">            stage = primaryStage;</span>
+<span class="nc" id="L51">            stage.setTitle(&quot;Bankieren&quot;);</span>
+<span class="nc" id="L52">            stage.setMinWidth(MINIMUM_WINDOW_WIDTH);</span>
+<span class="nc" id="L53">            stage.setMinHeight(MINIMUM_WINDOW_HEIGHT);</span>
+<span class="nc" id="L54">            gotoBankSelect();</span>
+            
+<span class="nc" id="L56">            primaryStage.show();</span>
+<span class="nc" id="L57">        } catch (Exception ex) {</span>
+<span class="nc" id="L58">            ex.printStackTrace();</span>
+<span class="nc" id="L59">        }</span>
+<span class="nc" id="L60">    }</span>
+    
+    
+     protected IBalie connectToBalie(String bankName) {
+        try {
+<span class="nc" id="L65">            FileInputStream in = new FileInputStream(bankName+&quot;.props&quot;);</span>
+<span class="nc" id="L66">            Properties props = new Properties();</span>
+<span class="nc" id="L67">            props.load(in);</span>
+<span class="nc" id="L68">            String rmiBalie = props.getProperty(&quot;balie&quot;);</span>
+<span class="nc" id="L69">            in.close();</span>
+
+<span class="nc" id="L71">            IBalie balie = (IBalie) Naming.lookup(&quot;rmi://&quot; + rmiBalie);</span>
+<span class="nc" id="L72">                        return balie;</span>
+
+<span class="nc" id="L74">            } catch (Exception exc) {</span>
+<span class="nc" id="L75">                exc.printStackTrace();</span>
+<span class="nc" id="L76">                return null;</span>
+            }
+    }
+    
+
+     protected void gotoBankSelect() {
+        try {
+<span class="nc" id="L83">            BankSelectController bankSelect = (BankSelectController) replaceSceneContent(&quot;BankSelect.fxml&quot;);</span>
+<span class="nc" id="L84">            bankSelect.setApp(this);</span>
+<span class="nc" id="L85">        } catch (Exception ex) {</span>
+<span class="nc" id="L86">            Logger.getLogger(BankierClient.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L87">        }</span>
+<span class="nc" id="L88">    }</span>
+    
+    
+
+     protected void gotoLogin(IBalie balie,String accountNaam) {
+        try {
+<span class="nc" id="L94">            LoginController login = (LoginController) replaceSceneContent(&quot;Login.fxml&quot;);</span>
+<span class="nc" id="L95">            login.setApp(this, balie, accountNaam);</span>
+<span class="nc" id="L96">        } catch (Exception ex) {</span>
+<span class="nc" id="L97">            Logger.getLogger(BankierClient.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L98">        }</span>
+<span class="nc" id="L99">    }</span>
+    
+    
+      protected void gotoOpenRekening(IBalie balie) {
+        try {
+<span class="nc" id="L104">            OpenRekeningController openRekeningController = (OpenRekeningController) replaceSceneContent(&quot;OpenRekening.fxml&quot;);</span>
+<span class="nc" id="L105">            openRekeningController.setApp(this,balie);</span>
+<span class="nc" id="L106">        } catch (Exception ex) {</span>
+<span class="nc" id="L107">            Logger.getLogger(BankierClient.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L108">        }</span>
+<span class="nc" id="L109">    }</span>
+      
+      protected void gotoBankierSessie(IBalie balie, IBankiersessie sessie) {
+        try {
+<span class="nc" id="L113">            BankierSessieController sessionController = (BankierSessieController) replaceSceneContent(&quot;BankierSessie.fxml&quot;);</span>
+<span class="nc" id="L114">            sessionController.setApp(this, balie, sessie);</span>
+<span class="nc" id="L115">        } catch (Exception ex) {</span>
+<span class="nc" id="L116">            Logger.getLogger(BankierClient.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L117">        }</span>
+<span class="nc" id="L118">    }</span>
+      
+
+    private Initializable replaceSceneContent(String fxml) throws Exception {
+<span class="nc" id="L122">        FXMLLoader loader = new FXMLLoader();</span>
+<span class="nc" id="L123">        InputStream in = BankierClient.class.getResourceAsStream(fxml);</span>
+<span class="nc" id="L124">        loader.setBuilderFactory(new JavaFXBuilderFactory());</span>
+<span class="nc" id="L125">        loader.setLocation(BankierClient.class.getResource(fxml));</span>
+        AnchorPane page;
+        try {
+<span class="nc" id="L128">            page = (AnchorPane) loader.load(in);</span>
+        } finally {
+<span class="nc" id="L130">            in.close();</span>
+<span class="nc" id="L131">        } </span>
+<span class="nc" id="L132">        Scene scene = new Scene(page, 800, 600);</span>
+       // scene.getStylesheets().add(&quot;bank/gui/ING.css&quot;);
+<span class="nc" id="L134">        stage.setScene(scene);</span>
+<span class="nc" id="L135">        stage.sizeToScene();</span>
+<span class="nc" id="L136">        return (Initializable) loader.getController();</span>
+    }
+    
+    
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+<span class="nc" id="L144">        launch(args);</span>
+<span class="nc" id="L145">    }</span>
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

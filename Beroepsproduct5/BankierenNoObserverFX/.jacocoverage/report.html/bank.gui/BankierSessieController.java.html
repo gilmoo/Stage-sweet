@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="nl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>BankierSessieController.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;BankierenNoObserverFX&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">bank.gui</a> &gt; <span class="el_source">BankierSessieController.java</span></div><h1>BankierSessieController.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package bank.gui;
+
+import bank.bankieren.IRekening;
+import bank.bankieren.Money;
+import bank.internettoegang.IBalie;
+import bank.internettoegang.IBankiersessie;
+import fontys.util.InvalidSessionException;
+import fontys.util.NumberDoesntExistException;
+import java.net.URL;
+import java.rmi.RemoteException;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+
+/**
+ * FXML Controller class
+ *
+ * @author frankcoenen
+ */
+<span class="nc" id="L32">public class BankierSessieController implements Initializable {</span>
+
+    @FXML
+    private Hyperlink hlLogout;
+
+    @FXML
+    private TextField tfNameCity;
+    @FXML
+    private TextField tfAccountNr;
+    @FXML
+    private TextField tfBalance;
+    @FXML
+    private TextField tfAmount;
+    @FXML
+    private TextField tfToAccountNr;
+    @FXML
+    private Button btTransfer;
+    @FXML
+
+    private TextArea taMessage;
+
+    private BankierClient application;
+    private IBalie balie;
+    private IBankiersessie sessie;
+
+    public void setApp(BankierClient application, IBalie balie, IBankiersessie sessie) {
+<span class="nc" id="L58">        this.balie = balie;</span>
+<span class="nc" id="L59">        this.sessie = sessie;</span>
+<span class="nc" id="L60">        this.application = application;</span>
+<span class="nc" id="L61">        IRekening rekening = null;</span>
+        try {
+<span class="nc" id="L63">            rekening = sessie.getRekening();</span>
+<span class="nc" id="L64">            tfAccountNr.setText(rekening.getNr() + &quot;&quot;);</span>
+<span class="nc" id="L65">            tfBalance.setText(rekening.getSaldo() + &quot;&quot;);</span>
+<span class="nc" id="L66">            String eigenaar = rekening.getEigenaar().getNaam() + &quot; te &quot;</span>
+<span class="nc" id="L67">                    + rekening.getEigenaar().getPlaats();</span>
+<span class="nc" id="L68">            tfNameCity.setText(eigenaar);</span>
+<span class="nc" id="L69">        } catch (InvalidSessionException ex) {</span>
+<span class="nc" id="L70">            taMessage.setText(&quot;bankiersessie is verlopen&quot;);</span>
+<span class="nc" id="L71">            Logger.getLogger(BankierSessieController.class.getName()).log(Level.SEVERE, null, ex);</span>
+
+<span class="nc" id="L73">        } catch (RemoteException ex) {</span>
+<span class="nc" id="L74">            taMessage.setText(&quot;verbinding verbroken&quot;);</span>
+<span class="nc" id="L75">            Logger.getLogger(BankierSessieController.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L76">        }</span>
+<span class="nc" id="L77">    }</span>
+
+    /**
+     * Initializes the controller class.
+     */
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+<span class="nc" id="L84">    }</span>
+
+    @FXML
+    private void logout(ActionEvent event) {
+        try {
+<span class="nc" id="L89">            sessie.logUit();</span>
+<span class="nc" id="L90">            application.gotoLogin(balie, &quot;&quot;);</span>
+<span class="nc" id="L91">        } catch (RemoteException e) {</span>
+<span class="nc" id="L92">            e.printStackTrace();</span>
+<span class="nc" id="L93">        }</span>
+<span class="nc" id="L94">    }</span>
+
+    @FXML
+    private void transfer(ActionEvent event) {
+        try {
+<span class="nc" id="L99">            int from = Integer.parseInt(tfAccountNr.getText());</span>
+<span class="nc" id="L100">            int to = Integer.parseInt(tfToAccountNr.getText());</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">            if (from == to) {</span>
+<span class="nc" id="L102">                taMessage.setText(&quot;can't transfer money to your own account&quot;);</span>
+            }
+<span class="nc" id="L104">            long centen = (long) (Double.parseDouble(tfAmount.getText()) * 100);</span>
+<span class="nc" id="L105">            sessie.maakOver(to, new Money(centen, Money.EURO));</span>
+<span class="nc" id="L106">        } catch (RemoteException e1) {</span>
+<span class="nc" id="L107">            e1.printStackTrace();</span>
+<span class="nc" id="L108">            taMessage.setText(&quot;verbinding verbroken&quot;);</span>
+<span class="nc" id="L109">        } catch (NumberDoesntExistException | InvalidSessionException e1) {</span>
+<span class="nc" id="L110">            e1.printStackTrace();</span>
+<span class="nc" id="L111">            taMessage.setText(e1.getMessage());</span>
+<span class="nc" id="L112">        }</span>
+<span class="nc" id="L113">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

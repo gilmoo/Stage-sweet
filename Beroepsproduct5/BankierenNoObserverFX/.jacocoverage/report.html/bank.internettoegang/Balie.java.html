@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="nl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Balie.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;BankierenNoObserverFX&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">bank.internettoegang</a> &gt; <span class="el_source">Balie.java</span></div><h1>Balie.java</h1><pre class="source lang-java linenums">package bank.internettoegang;
+
+import java.rmi.*;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.*;
+import bank.bankieren.*;
+
+public class Balie extends UnicastRemoteObject implements IBalie {
+
+	private static final long serialVersionUID = -4194975069137290780L;
+	private IBank bank;
+	private HashMap&lt;String, ILoginAccount&gt; loginaccounts;
+	//private Collection&lt;IBankiersessie&gt; sessions;
+	private java.util.Random random;
+
+<span class="fc" id="L16">	public Balie(IBank bank) throws RemoteException {</span>
+<span class="fc" id="L17">		this.bank = bank;</span>
+<span class="fc" id="L18">		loginaccounts = new HashMap&lt;String, ILoginAccount&gt;();</span>
+		//sessions = new HashSet&lt;IBankiersessie&gt;();
+<span class="fc" id="L20">		random = new Random();</span>
+<span class="fc" id="L21">	}</span>
+
+	public String openRekening(String naam, String plaats, String wachtwoord) {
+<span class="fc bfc" id="L24" title="All 2 branches covered.">		if (naam.equals(&quot;&quot;))</span>
+<span class="fc" id="L25">			return null;</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">		if (plaats.equals(&quot;&quot;))</span>
+<span class="fc" id="L27">			return null;</span>
+
+<span class="fc bfc" id="L29" title="All 4 branches covered.">		if (wachtwoord.length() &lt; 4 || wachtwoord.length() &gt; 8)</span>
+<span class="fc" id="L30">			return null;</span>
+
+<span class="fc" id="L32">		int nr = bank.openRekening(naam, plaats);</span>
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">		if (nr == -1)</span>
+<span class="nc" id="L34">			return null;</span>
+
+<span class="fc" id="L36">		String accountname = generateId(8);</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">		while (loginaccounts.containsKey(accountname))</span>
+<span class="nc" id="L38">			accountname = generateId(8);</span>
+<span class="fc" id="L39">		loginaccounts.put(accountname, new LoginAccount(accountname,</span>
+				wachtwoord, nr));
+
+<span class="fc" id="L42">		return accountname;</span>
+	}
+
+	public IBankiersessie logIn(String accountnaam, String wachtwoord)
+			throws RemoteException {
+<span class="fc" id="L47">		ILoginAccount loginaccount = loginaccounts.get(accountnaam);</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">		if (loginaccount == null)</span>
+<span class="nc" id="L49">			return null;</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">		if (loginaccount.checkWachtwoord(wachtwoord)) {</span>
+<span class="fc" id="L51">			IBankiersessie sessie = new Bankiersessie(loginaccount</span>
+<span class="fc" id="L52">					.getReknr(), bank);</span>
+			
+<span class="fc" id="L54">		 	return sessie;</span>
+		}
+<span class="nc" id="L56">		else return null;</span>
+	}
+
+	private static final String CHARS = &quot;abcdefghijklmnopqrstuvwxyz0123456789&quot;;
+
+	private String generateId(int x) {
+<span class="fc" id="L62">		StringBuilder s = new StringBuilder();</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">		for (int i = 0; i &lt; x; i++) {</span>
+<span class="fc" id="L64">			int rand = random.nextInt(36);</span>
+<span class="fc" id="L65">			s.append(CHARS.charAt(rand));</span>
+		}
+<span class="fc" id="L67">		return s.toString();</span>
+	}
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
